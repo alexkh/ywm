@@ -1,8 +1,8 @@
 # ywm
 Minimalist window manager with only dependence: libXCB
 
-At this point, a mouse with 5 buttons is required, the buttons 4 and 5, usually
-acting as 'back' and 'forward' buttons in browsers. This window manager
+At this point, a mouse with at least 5 buttons is required, the buttons 4 and 5,
+normally acting as 'back' and 'forward' buttons in browsers. This window manager
 assigns a different function to the back button: it is used for moving windows.
 See Usage section for details.
 
@@ -44,4 +44,5 @@ Most of the operations are performed using 'back' mouse button:
 
 Three xterm teminals are started automatically, but you can add more by
 pressing 'Mod-key' + 'Enter'
+
 
