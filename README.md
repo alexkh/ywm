@@ -5,6 +5,8 @@ Minimalist window manager with only dependence: libXCB
 Build + Install
 ---------------
 
+chmod 700 install mk
+
 cd ywm
 
 ./mk
