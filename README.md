@@ -1,6 +1,11 @@
 # ywm
 Minimalist window manager with only dependence: libXCB
 
+At this point, a mouse with 5 buttons is required, the buttons 4 and 5, usually
+acting as 'back' and 'forward' buttons in browsers. This window manager
+assigns a different function to the back button: it is used for moving windows.
+See Usage section for details.
+
 Download using GIT:
 -------------------
 
