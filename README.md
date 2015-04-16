@@ -1,6 +1,12 @@
 # ywm
 Minimalist window manager with only dependence: libXCB
 
+Download using GIT:
+-------------------
+
+git clone https://github.com/alexkh/ywm.git
+
+
 
 Build + Install
 ---------------
