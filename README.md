@@ -6,7 +6,9 @@ Build + Install
 ---------------
 
 cd ywm
+
 ./mk
+
 sudo ./install
 
 
