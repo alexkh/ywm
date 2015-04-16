@@ -1,0 +1,2 @@
+mv /usr/bin/ywm /usr/bin/y_move /usr/bin/y_resize /tmp/ >/dev/null 2>/dev/null
+cp ywm y_move y_resize /usr/bin/
