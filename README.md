@@ -29,7 +29,8 @@ sudo ./install
 Usage
 -----
 
-Most of the operations are performed using 'back' mouse button:
+Most of the operations are performed using 'back' mouse button, which in xorg
+is identified by number 8:
 
 'mouse-back-button' + move mouse:		to move a window
 

@@ -135,8 +135,6 @@ void Wm::check_cookie(xcb_void_cookie_t cookie, const char *err_msg) {
 	error = xcb_request_check(conn, cookie);
 	if(error) {
 		xcb_disconnect(conn);
-//		cout << "ERROR: " << err_msg << " CODE: " <<
-//			error->error_code << endl;
 		exit(-1);
 	}
 }
@@ -151,10 +149,7 @@ void Wm::draw_text(xcb_gcontext_t fontgc, int16_t x, int16_t y,
 							const char *label) {
 	TextItem ti;
 	ti.nchars = utf8toXChar2b(ti.text, 256, label, strlen(label));
-//	ti.nchars = strlen(label);
 	ti.delta = 0;
-	//strncpy(ti.text, label, ti.nchars);
-	//ti.text[ti.nchars] = '\0';
 	xcb_void_cookie_t text_cookie = xcb_poly_text_16_checked(conn,
 		rootwin, fontgc, x, y, ti.nchars * 2 + 2, (const uint8_t*)&ti);
 	check_cookie(text_cookie, "can't draw text");
@@ -249,9 +244,9 @@ void Wm::init() {
 	}
 
 	// create fonts
-	mono1 = get_font_gc("-*-fixed-medium-r-*-*-13-*-*-*-*-*-ISO10646-1");
-	sans1 =get_font_gc("-*-helvetica-medium-r-*-*-11-*-*-*-*-*-ISO10646-1");
-	serif1 = get_font_gc("-*-times-medium-r-*-*-14-*-*-*-*-*-*-*");
+	mono1 = get_font_gc("-*-fixed-bold-r-*-*-13-*-*-*-*-*-ISO10646-1");
+	sans1 = get_font_gc("-*-fixed-medium-r-*-*-7-*-*-*-*-*-ISO10646-1");
+//	serif1 = get_font_gc("-*-times-medium-r-*-*-14-*-*-*-*-*-*-*");
 
 //	draw();
 	uint32_t evmask = XCB_EVENT_MASK_BUTTON_PRESS |
@@ -324,8 +319,7 @@ void Wm::enter_move() {
 		exit(-1);
 	case 0: { // child
 		char *newargv[] = { (char*)&"y_move", winstr, NULL };
-		execve("/usr/share/control/bin/wmove_pointer",
-					newargv, envp);
+		execve("/usr/bin/y_move", newargv, envp);
 		exit(-1); // should never get here
 	}
 	}
@@ -338,15 +332,14 @@ void Wm::enter_resize() {
 		exit(-1);
 	case 0: { // child
 		char *newargv[] = { (char*)&"y_resize", winstr, NULL };
-		execve("/usr/share/control/bin/wresize_pointer",
-					newargv, envp);
+		execve("/usr/bin/y_resize", newargv, envp);
 		exit(-1); // should never get here
 	}
 	}
 }
 
 void Wm::print_status(const char *s) {
-	xcb_image_text_8_checked(conn, strlen(s), rootwin, sans1, 300, 10, s);
+	xcb_image_text_8_checked(conn, strlen(s), rootwin, mono1, 300, 10, s);
 	xcb_flush(conn);
 }
 
@@ -374,7 +367,6 @@ void Wm::event_loop() {
 			char s[1024];
 			snprintf(s, 1023, "Key pressed: %d, %d          ",
 				key, kp->state);
-//			draw_text(sans1, 1000, 500, s);
 			xcb_image_text_8_checked(conn, strlen(s), rootwin,
 				sans1, 1000, 500, s);
 			xcb_flush(conn);
@@ -486,14 +478,9 @@ void Wm::event_loop() {
 				if(opmode) break; // activated from normal mode
 				win = bp->child;
 				snprintf(winstr, 19, "%d", win);
-		//		snprintf(status, 1023, "Moving: %s           ",
-		//					winstr);
-
 				xcb_grab_pointer(conn, 0, rootwin,
 					XCB_EVENT_MASK_BUTTON_PRESS |
 					XCB_EVENT_MASK_BUTTON_RELEASE,
-//					XCB_EVENT_MASK_BUTTON_MOTION |
-//					XCB_EVENT_MASK_POINTER_MOTION_HINT,
 					XCB_GRAB_MODE_ASYNC,
 					XCB_GRAB_MODE_ASYNC,
 					rootwin, XCB_NONE,
@@ -550,8 +537,6 @@ void Wm::event_loop() {
 					XCB_CURRENT_TIME);
 
 				xcb_flush(conn);
-	//			xcb_kill_client(conn, bp->child);
-	//			xcb_flush(conn);
 				break;
 			}
 			}
@@ -593,14 +578,6 @@ void Wm::event_loop() {
 			}
 			break;
 		}
-/*		case XCB_MAP_REQUEST: {
-			xcb_map_request_event_t *e =
-				(xcb_map_request_event_t *)ev;
-			xcb_map_window(conn, e->window);
-			xcb_flush(conn);
-			break;
-		}
-*/
 		case XCB_CONFIGURE_NOTIFY: {
 			xcb_configure_notify_event_t *e =
 				(xcb_configure_notify_event_t *)ev;
@@ -622,17 +599,6 @@ void Wm::event_loop() {
 			wd.y = e->y;
 			wd.w = e->width;
 			wd.h = e->height;
-/*			// update window name display if this window is in focus
-			if(e->window == focuswin) {
-				char wname[1024];
-				wname[0] = 0;
-				size_t len = get_window_name(e->window, wname,
-									1024);
-				snprintf(status, 1023, "%s", wname);
-			}
-			log << "Con notify: " << e->event << " " << e->window <<
-				endl;
-*/
 			break;
 		}
 		case XCB_MAP_NOTIFY: {
@@ -732,28 +698,6 @@ void Wm::event_loop() {
 				//log << "Ignoring root window" << endl;
 				break;
 			}
-
-			// get window name:
-/*			xcb_get_property_cookie_t cookie;
-			xcb_get_property_reply_t *reply;
-			xcb_atom_t property = XCB_ATOM_WM_NAME;
-			xcb_atom_t type = XCB_ATOM_STRING;
-			int len;
-			cookie = xcb_get_property(conn, 0, e->event, property,
-				type, 0, 200);
-			if((reply = xcb_get_property_reply(
-						conn, cookie, NULL))) {
-				len = xcb_get_property_value_length(reply);
-				if(len != 0) {
-					len = (len > 1023)? 1023: len;
-					strncpy(wname,
-					(char *)xcb_get_property_value(reply),
-						len);
-					wname[len] = 0;
-				}
-				free(reply);
-			}
-*/
 			// don't set focus to focuswin
 			if(e->event == focuswin) {
 				log << "Already focused, but..." << endl;
@@ -779,25 +723,9 @@ void Wm::event_loop() {
 			xcb_set_input_focus(conn,
 					XCB_INPUT_FOCUS_POINTER_ROOT, e->event,
 					XCB_CURRENT_TIME);
-			draw();
-//			xcb_flush(conn); // draw() flushes for us
+			draw(); // draw() flushes for us, no need for xcb_flush
 
 			focuswin = e->event;
-/*
-	TextItem ti;
-	ti.nchars = 240;
-	ti.delta = 0;
-	for(unsigned char i = 0; i < 100; ++i) {
-		for(unsigned char j = 0; j < 255; ++j) {
-			ti.text[j].byte1 = i;
-			ti.text[j].byte2 = j;
-		}
-		xcb_void_cookie_t text_cookie = xcb_poly_text_16(conn,
-			rootwin, mono1, 0, i * 10 + 20, ti.nchars * 2 + 2,
-			(const uint8_t *)&ti);
-	}
-*/
-
 
 			log << "Setting focus to window '" << wname << "'" <<
 				e->root << " " <<
