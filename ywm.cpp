@@ -2,12 +2,10 @@
 #include <xcb/xcb_atom.h>
 #include <xcb/xcb_ewmh.h>
 #include <xcb/xcb_icccm.h>
-#include <xcb/xcb_image.h>
 #include <string.h>
 #include <stdint.h>
 #include <stdlib.h> // exit
 #include <stdio.h>
-#include <png.h>
 
 #include <signal.h>
 #include <stdlib.h>
